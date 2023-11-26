@@ -1,10 +1,10 @@
 package opentelemetry
 
 import (
+	"github.com/ExerciseCoding/template/internal/web"
+	"github.com/ExerciseCoding/template/internal/web/demo"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	//"template/internal/web"
-	//"template/internal/web/demo"
 )
 
 type MiddlewareBuilder struct {

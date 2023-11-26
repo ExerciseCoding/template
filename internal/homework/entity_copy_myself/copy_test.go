@@ -3,9 +3,9 @@ package entity_copy_myself
 import (
 	"errors"
 	"fmt"
+	"github.com/ExerciseCoding/template/internal/homework/entity_copy_myself/types"
 	"github.com/stretchr/testify/assert"
 	"reflect"
-	//"template/internal/homework/entity_copy_myself/types"
 	"testing"
 )
 

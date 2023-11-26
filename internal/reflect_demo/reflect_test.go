@@ -3,9 +3,9 @@ package reflect_demo
 import (
 	"errors"
 	"fmt"
+	"github.com/ExerciseCoding/template/internal/reflect_demo/types"
 	"github.com/stretchr/testify/assert"
 	"reflect"
-	//"template/internal/reflect_demo/types"
 	"testing"
 )
 

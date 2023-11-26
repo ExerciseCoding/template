@@ -2,7 +2,7 @@ package accesslog
 
 import (
 	"encoding/json"
-	//v2 "template/internal/web_server/v2"
+	"github.com/ExerciseCoding/template/internal/web_server/v2"
 )
 
 type MiddlewareBuilder struct {

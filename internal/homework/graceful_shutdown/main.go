@@ -2,9 +2,9 @@ package graceful_shutdown
 
 import (
 	"context"
+	"github.com/ExerciseCoding/template/internal/homework/graceful_shutdown/service"
 	"log"
 	"net/http"
-	//"template/internal/homework/graceful_shutdown/service"
 	"time"
 )
 

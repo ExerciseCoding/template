@@ -2,8 +2,8 @@ package accesslog
 
 import (
 	"fmt"
+	"github.com/ExerciseCoding/template/internal/web_server/v2"
 	"net/http"
-	//v2 "template/internal/web_server/v2"
 	"testing"
 )
 

@@ -1,6 +1,7 @@
 package opentelemetry
 
 import (
+	"github.com/ExerciseCoding/template/internal/web_server/v2"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -10,7 +11,6 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 	"log"
 	"os"
-	"template/internal/web_server/v2"
 	"testing"
 	"time"
 )
