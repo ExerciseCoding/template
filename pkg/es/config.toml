@@ -1,0 +1,7 @@
+[Es]
+Url = "30.42.227.122:9200"
+UserName = "elastic"
+Password = "Klwei90203-zd+3237"
+IndexGatewayMetricsPrefix = "gateway_metrics"
+
+
