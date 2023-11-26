@@ -6,7 +6,7 @@ package accesslog
 
 import (
 	"fmt"
-	v2 "template/internal/web_server/v2"
+	//v2 "template/internal/web_server/v2"
 	"testing"
 )
 

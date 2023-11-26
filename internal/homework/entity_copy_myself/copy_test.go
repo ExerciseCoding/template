@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"reflect"
-	"template/internal/homework/entity_copy_myself/types"
+	//"template/internal/homework/entity_copy_myself/types"
 	"testing"
 )
 

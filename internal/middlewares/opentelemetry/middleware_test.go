@@ -10,7 +10,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 	"log"
 	"os"
-	v2 "template/internal/web_server/v2"
+	"template/internal/web_server/v2"
 	"testing"
 	"time"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"template/internal/homework/graceful_shutdown/service"
+	//"template/internal/homework/graceful_shutdown/service"
 	"time"
 )
 
@@ -28,7 +28,7 @@ func StoreCacheToDBCallback(ctx context.Context) {
 	}()
 
 	select {
-	case <- ctx.Done():
+	case <-ctx.Done():
 		log.Printf("刷新缓存超时")
 	case <-done:
 		log.Printf("缓存被刷新到了DB")

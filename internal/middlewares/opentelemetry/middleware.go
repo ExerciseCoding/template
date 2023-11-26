@@ -1,7 +1,6 @@
 package opentelemetry
 
 import (
-	v2 "github.com/ExerciseCoding/template/tree/main/internal/web_server/v2"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"

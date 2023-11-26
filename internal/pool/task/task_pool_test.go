@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"template/internal/bean/option"
+	//"template/internal/bean/option"
 	"testing"
 	"time"
 

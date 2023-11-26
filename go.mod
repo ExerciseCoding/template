@@ -1,4 +1,4 @@
-module template
+module github.com/ExerciseCoding/template
 
 go 1.18
 
@@ -12,7 +12,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
-	github.com/ExerciseCoding/template v1.0.0
+	github.com/ExerciseCoding/template v1.0.1
 	go.opentelemetry.io/otel v1.21.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
 	go.opentelemetry.io/otel/exporters/zipkin v1.21.0

@@ -3,7 +3,7 @@ package accesslog
 import (
 	"fmt"
 	"net/http"
-	v2 "template/internal/web_server/v2"
+	//v2 "template/internal/web_server/v2"
 	"testing"
 )
 
