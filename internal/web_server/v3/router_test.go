@@ -428,5 +428,132 @@ func TestRouter_findRoute(t *testing.T) {
 }
 
 func TestRouter_findRouter_Middleware(t *testing.T) {
+	mdlBuilder := func(i byte) Middleware {
+		return func(next HandlerFunc) HandlerFunc {
+			return func(ctx *Context) {
+				ctx.RespData = append(ctx.RespData, i)
+				next(ctx)
+			}
+		}
+	}
+	testRouters := []struct {
+		method string
+		path   string
 
+		mdls []Middleware
+	}{
+		{
+			method: http.MethodGet,
+			path:   "/a/b",
+			mdls:   []Middleware{mdlBuilder('a'), mdlBuilder('b')},
+		},
+		{
+			method: http.MethodGet,
+			path:   "/a/*",
+			mdls:   []Middleware{mdlBuilder('a'), mdlBuilder('*')},
+		},
+		{
+			method: http.MethodGet,
+			path:   "/a/b/*",
+			mdls:   []Middleware{mdlBuilder('a'), mdlBuilder('b'), mdlBuilder('*')},
+		},
+		{
+			method: http.MethodPost,
+			path:   "/a/b/*",
+			mdls:   []Middleware{mdlBuilder('a'), mdlBuilder('b'), mdlBuilder('*')},
+		},
+		{
+			method: http.MethodPost,
+			path:   "/a/*/c",
+			mdls:   []Middleware{mdlBuilder('a'), mdlBuilder('*'), mdlBuilder('c')},
+		},
+		{
+			method: http.MethodPost,
+			path:   "/a/b/c",
+			mdls:   []Middleware{mdlBuilder('a'), mdlBuilder('b'), mdlBuilder('c')},
+		},
+		{
+			method: http.MethodDelete,
+			path:   "/*",
+			mdls:   []Middleware{mdlBuilder('*')},
+		},
+		{
+			method: http.MethodDelete,
+			path:   "/",
+			mdls:   []Middleware{mdlBuilder('/')},
+		},
+	}
+	//var mockHandler HandlerFunc = func(context *Context) {}
+	r := newRouter()
+	for _, route := range testRouters {
+		r.addRoute(route.method, route.path, nil, route.mdls...)
+	}
+
+	testCases := []struct {
+		name string
+
+		method string
+		path   string
+
+		wantResp string
+	}{
+		{
+			name:   "static, not match",
+			method: http.MethodGet,
+			path:   "/a",
+		},
+		{
+			name:     "static, match",
+			method:   http.MethodGet,
+			path:     "/a/c",
+			wantResp: "a*",
+		},
+		{
+			name:     "static and star",
+			method:   http.MethodGet,
+			path:     "/a/b",
+			wantResp: "a*ab",
+		},
+		{
+			name:     "static and star",
+			method:   http.MethodGet,
+			path:     "/a/b/c",
+			wantResp: "a*abab*",
+		},
+		{
+			name:     "abc",
+			method:   http.MethodPost,
+			path:     "/a/b/c",
+			wantResp: "a*cab*abc",
+		},
+		{
+			name:     "root",
+			method:   http.MethodDelete,
+			path:     "/",
+			wantResp: "/",
+		},
+		{
+			name:     "root star",
+			method:   http.MethodDelete,
+			path:     "/a",
+			wantResp: "/*",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			mi, _ := r.findRoute(tc.method, tc.path)
+			mdls := mi.mdls
+			var root HandlerFunc = func(ctx *Context) {
+				assert.Equal(t, tc.wantResp, string(ctx.RespData))
+			}
+			for i := len(mdls) - 1; i >= 0; i-- {
+				root = mdls[i](root)
+			}
+
+			root(&Context{
+				RespData: make([]byte, 0, len(tc.wantResp)),
+			})
+		})
+	}
 }

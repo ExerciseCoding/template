@@ -51,7 +51,7 @@ func newRouter() router {
 
 // AddRoute 加一些限制
 // path 必须以 / 开头，不能以 / 结尾， 中间也不能有连续的 //
-func (r *router) addRoute(method string, path string, handleFunc HandlerFunc, mdl ...Middleware) {
+func (r *router) addRoute(method string, path string, handleFunc HandlerFunc, mdls ...Middleware) {
 	if path == "" {
 		panic("web: 路径不能为空字符串")
 	}
@@ -80,8 +80,7 @@ func (r *router) addRoute(method string, path string, handleFunc HandlerFunc, md
 			panic("web: 路由冲突[/]")
 		}
 		root.handler = handleFunc
-		root.route = "/"
-		root.mdls = mdl
+		root.mdls = mdls
 		return
 	}
 	//切割path, /use/home切割会被分成三段
@@ -93,15 +92,14 @@ func (r *router) addRoute(method string, path string, handleFunc HandlerFunc, md
 		}
 		// 递归下去，找准位置
 		// 如果中途有节点不存在，就要创建出来
-		children := root.childOrCreate(seg)
-		root = children
+		root = root.childOrCreate(seg)
 	}
 	if root.handler != nil {
 		panic(fmt.Sprintf("web: 路由冲突[%s]", path))
 	}
 	root.handler = handleFunc
 	root.route = path
-	root.mdls = mdl
+	root.mdls = mdls
 }
 
 func (n *node) childOrCreate(seg string) *node {
@@ -139,7 +137,8 @@ func (r *router) findRoute(method string, path string) (*matchInfo, bool) {
 	}
 	if path == "/" {
 		return &matchInfo{
-			n: root,
+			n:    root,
+			mdls: root.mdls,
 		}, true
 	}
 
@@ -151,7 +150,6 @@ func (r *router) findRoute(method string, path string) (*matchInfo, bool) {
 		if !found {
 			return nil, false
 		}
-
 		// 命中了路径参数
 		if paramChild {
 			if pathParams == nil {
@@ -161,49 +159,74 @@ func (r *router) findRoute(method string, path string) (*matchInfo, bool) {
 		}
 		root = child
 	}
-
-	return &matchInfo{
+	mi := &matchInfo{
 		n:          root,
 		pathParams: pathParams,
 		mdls:       r.findMdls(root, segs),
-	}, true
+	}
+	return mi, true
 }
 
 func (r *router) findMdls(root *node, segs []string) []Middleware {
-	mdls := make([]Middleware, 0, 10)
-	queue := []*node{
-		root,
-	}
+	//res := make([]Middleware, 0, 16)
+	//queue := []*node{
+	//	root,
+	//}
+	//for i := 0; i < len(segs); i++ {
+	//	seg := segs[i]
+	//	var children []*node
+	//	for _, cur := range queue {
+	//		if len(cur.mdls) > 0 {
+	//			res = append(res, cur.mdls...)
+	//		}
+	//		children = append(children, cur.childrenOf(seg)...)
+	//	}
+	//	queue = children
+	//}
+	//
+	//for _, cur := range queue {
+	//	if len(cur.mdls) > 0 {
+	//		res = append(res, cur.mdls...)
+	//	}
+	//}
+	//return res
+	queue := []*node{root}
+	res := make([]Middleware, 0, 16)
 	for i := 0; i < len(segs); i++ {
 		seg := segs[i]
 		var children []*node
 		for _, cur := range queue {
-			if cur.mdls != nil {
-				mdls = append(mdls, cur.mdls...)
+			fmt.Println(cur.mdls)
+			if len(cur.mdls) > 0 {
+				res = append(res, cur.mdls...)
 			}
 			children = append(children, cur.childrenOf(seg)...)
 		}
+		fmt.Println(len(children[0].mdls), children[0].path)
 		queue = children
 	}
 
 	for _, cur := range queue {
-		if cur.mdls != nil {
-			mdls = append(mdls, cur.mdls...)
+		if len(cur.mdls) > 0 {
+			res = append(res, cur.mdls...)
 		}
 	}
-	return mdls
+	return res
 }
 
 func (n *node) childrenOf(path string) []*node {
+	fmt.Println(n.children[path])
 	res := make([]*node, 0, 4)
 	var static *node
 	if n.children != nil {
 		static = n.children[path]
 	}
 	if n.startChild != nil {
+		fmt.Println("n.startChild")
 		res = append(res, n.startChild)
 	}
 	if n.paramChild != nil {
+		fmt.Println("n.paramChild")
 		res = append(res, n.paramChild)
 	}
 	if static != nil {

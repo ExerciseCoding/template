@@ -5,14 +5,14 @@ import (
 	"net/http"
 )
 
-type HandlerFunc func(context *Context)
+type HandlerFunc func(ctx *Context)
 
 type Server interface {
 	http.Handler
 
 	Start(addr string) error
 
-	addRoute(method string, path string, handlerFunc HandlerFunc)
+	addRoute(method string, path string, handlerFunc HandlerFunc, mdls ...Middleware)
 }
 
 // 确保 HTTPServer 肯定实现了 Server 接口

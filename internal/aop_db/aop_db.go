@@ -1,4 +1,4 @@
-package orm
+package aop_db
 
 import (
 	"context"
@@ -13,7 +13,7 @@ type AopDB struct {
 }
 
 type AopDBContext struct {
-	query  string
+	query string
 	args  []any
 }
 
@@ -23,7 +23,6 @@ type AopDBResult struct {
 
 type Handler func(ctx *AopDBContext) *AopDBResult
 type Middleware func(next Handler) Handler
-
 
 func (db *AopDB) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
 	// 在这之前做点东西
@@ -35,12 +34,10 @@ func (db *AopDB) QueryRowContext(ctx context.Context, query string, args ...any)
 	}
 
 	// 在这之后做点东西
-	for i := len(db.ms) -1; i >= 0; i-- {
+	for i := len(db.ms) - 1; i >= 0; i-- {
 		handler = db.ms[i](handler)
 	}
 
-	res := handler(&AopDBContext{
-
-	})
+	res := handler(&AopDBContext{})
 	return res.row
 }
