@@ -3,11 +3,15 @@ module github.com/ExerciseCoding/template
 go 1.18
 
 require (
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gogf/gf v1.16.9
+	github.com/google/uuid v1.5.0
+	github.com/hashicorp/golang-lru v1.0.2
 	github.com/json-iterator/go v1.1.12
 	github.com/marmotedu/component-base v1.6.2
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/olivere/elastic/v7 v7.0.32
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/sirupsen/logrus v1.9.3
@@ -29,6 +33,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/clbanning/mxj v1.8.5-0.20200714211355-ff02cfb8ea28 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect

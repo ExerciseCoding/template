@@ -81,7 +81,7 @@ func Not(p Predicate) Predicate {
 	}
 }
 
-// C("id").Eq(12).And(C("name").Eq("Tom"))
+// And C("id").Eq(12).And(C("name").Eq("Tom"))
 func (left Predicate) And(right Predicate) Predicate {
 	return Predicate{
 		left:  left,
@@ -90,7 +90,7 @@ func (left Predicate) And(right Predicate) Predicate {
 	}
 }
 
-// C("id").Eq(12).Or(C("name").Eq("Tom"))
+// Or C("id").Eq(12).Or(C("name").Eq("Tom"))
 func (left Predicate) Or(right Predicate) Predicate {
 	return Predicate{
 		left:  left,
