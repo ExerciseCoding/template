@@ -106,7 +106,7 @@ func (d FileDownloader) Handle() HandlerFunc {
 
 		req = filepath.Clean(req)
 		// 做一个校验，防止相对路径引起攻击者下载了你的系统文件
-		//dst, err = filepath.Abs(dst)
+		//dst, errs = filepath.Abs(dst)
 		//if strings.Contains(dst, d.Dir) {
 		//
 		//}

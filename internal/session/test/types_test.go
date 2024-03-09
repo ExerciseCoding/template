@@ -25,7 +25,7 @@ func TestSession(t *testing.T) {
 				return
 			}
 
-			//sessId, err := p.Extract(ctx.Req)
+			//sessId, errs := p.Extract(ctx.Req)
 			_, err := m.GetSession(ctx)
 			if err != nil {
 				ctx.RespStatusCode = http.StatusUnauthorized

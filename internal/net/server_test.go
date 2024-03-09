@@ -52,8 +52,8 @@ func handle(conn net.Conn) {
 //func handle(conn net.Conn) {
 //	go func() {
 //		resp <- ch
-//		_, err = conn.Write([]byte("hello, world"))
-//		if err != nil {
+//		_, errs = conn.Write([]byte("hello, world"))
+//		if errs != nil {
 //			conn.Close()
 //			return
 //		}
@@ -61,15 +61,15 @@ func handle(conn net.Conn) {
 //
 //	for {
 //		lenBs := make([]byte, 8)
-//		_, err := conn.Read(lenBs)
-//		if err != nil {
+//		_, errs := conn.Read(lenBs)
+//		if errs != nil {
 //			conn.Close()
 //			return
 //		}
 //		msgLen := binary.BigEndian.Uint64(lenBs)
 //		reqBs := make([]byte, msgLen)
-//		_, err = conn.Read(reqBs)
-//		if err != nil {
+//		_, errs = conn.Read(reqBs)
+//		if errs != nil {
 //			conn.Close()
 //			return
 //		}

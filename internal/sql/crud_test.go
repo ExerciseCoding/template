@@ -110,7 +110,7 @@ func (s *sqlTestSuite) TestCRUD() {
 		tm := &TestModel{}
 		err = rows.Scan(&tm.Id, &tm.FirstName,&tm.Age,&tm.LastName)
 		// 常见错误，缺了指针
-		// err = rows.Scan(tm.Id,tm.FirstName,tm.Age, tm.LastName)
+		// errs = rows.Scan(tm.Id,tm.FirstName,tm.Age, tm.LastName)
 		if err != nil {
 			rows.Close()
 			t.Fatal(err)

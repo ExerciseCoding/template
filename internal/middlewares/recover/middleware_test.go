@@ -17,7 +17,7 @@ func TestMiddlewareBuilder_Build(t *testing.T) {
 
 	server := v2.NewHTTPServer(v2.ServerWithMiddleware(builder.Build()))
 	server.Get("/user", func(ctx *v2.Context) {
-		panic("err")
+		panic("errs")
 	})
 	server.Start(":8081")
 }

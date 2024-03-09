@@ -55,12 +55,12 @@ func (c *Context) RespJsonAndStatus(status int, val any) error {
 		return err
 	}
 
-	//n, err := c.Resp.Write(data)
+	//n, errs := c.Resp.Write(data)
 	//if n != len(data) {
 	//	return errors.New("web: 未写完数据")
 	//}
-	//if err != nil {
-	//	return err
+	//if errs != nil {
+	//	return errs
 	//}
 	//c.Resp.WriteHeader(status)
 	//c.Resp.Header().Set("Content-Type", "application/json")

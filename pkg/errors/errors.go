@@ -2,8 +2,8 @@
 //
 // The traditional error handling idiom in Go is roughly akin to
 //
-//     if err != nil {
-//             return err
+//     if errs != nil {
+//             return errs
 //     }
 //
 // which when applied recursively up the call stack results in error reports
@@ -17,9 +17,9 @@
 // original error by recording a stack trace at the point Wrap is called,
 // together with the supplied message. For example
 //
-//     _, err := ioutil.ReadAll(r)
-//     if err != nil {
-//             return errors.Wrap(err, "read failed")
+//     _, errs := ioutil.ReadAll(r)
+//     if errs != nil {
+//             return errors.Wrap(errs, "read failed")
 //     }
 //
 // If additional control is required, the errors.WithStack and
@@ -42,7 +42,7 @@
 // the topmost error that does not implement causer, which is assumed to be
 // the original cause. For example:
 //
-//     switch err := errors.Cause(err).(type) {
+//     switch errs := errors.Cause(errs).(type) {
 //     case *MyError:
 //             // handle specifically
 //     default:
@@ -80,8 +80,8 @@
 // the fmt.Formatter interface that can be used for printing information about
 // the stack trace of this error. For example:
 //
-//     if err, ok := err.(stackTracer); ok {
-//             for _, f := range err.StackTrace() {
+//     if errs, ok := errs.(stackTracer); ok {
+//             for _, f := range errs.StackTrace() {
 //                     fmt.Printf("%+s:%d\n", f, f)
 //             }
 //     }
@@ -140,8 +140,8 @@ func (f *fundamental) Format(s fmt.State, verb rune) {
 	}
 }
 
-// WithStack annotates err with a stack trace at the point WithStack was called.
-// If err is nil, WithStack returns nil.
+// WithStack annotates errs with a stack trace at the point WithStack was called.
+// If errs is nil, WithStack returns nil.
 func WithStack(err error) error {
 	if err == nil {
 		return nil
@@ -194,9 +194,9 @@ func (w *withStack) Format(s fmt.State, verb rune) {
 	}
 }
 
-// Wrap returns an error annotating err with a stack trace
+// Wrap returns an error annotating errs with a stack trace
 // at the point Wrap is called, and the supplied message.
-// If err is nil, Wrap returns nil.
+// If errs is nil, Wrap returns nil.
 func Wrap(err error, message string) error {
 	if err == nil {
 		return nil
@@ -220,9 +220,9 @@ func Wrap(err error, message string) error {
 	}
 }
 
-// Wrapf returns an error annotating err with a stack trace
+// Wrapf returns an error annotating errs with a stack trace
 // at the point Wrapf is called, and the format specifier.
-// If err is nil, Wrapf returns nil.
+// If errs is nil, Wrapf returns nil.
 func Wrapf(err error, format string, args ...interface{}) error {
 	if err == nil {
 		return nil
@@ -247,8 +247,8 @@ func Wrapf(err error, format string, args ...interface{}) error {
 	}
 }
 
-// WithMessage annotates err with a new message.
-// If err is nil, WithMessage returns nil.
+// WithMessage annotates errs with a new message.
+// If errs is nil, WithMessage returns nil.
 func WithMessage(err error, message string) error {
 	if err == nil {
 		return nil
@@ -259,8 +259,8 @@ func WithMessage(err error, message string) error {
 	}
 }
 
-// WithMessagef annotates err with the format specifier.
-// If err is nil, WithMessagef returns nil.
+// WithMessagef annotates errs with the format specifier.
+// If errs is nil, WithMessagef returns nil.
 func WithMessagef(err error, format string, args ...interface{}) error {
 	if err == nil {
 		return nil

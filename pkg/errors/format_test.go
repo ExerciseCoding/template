@@ -401,7 +401,7 @@ func testFormatRegexp(t *testing.T, n int, arg interface{}, format, want string)
 			t.Fatal(err)
 		}
 		if !match {
-			t.Errorf("test %d: line %d: fmt.Sprintf(%q, err):\n got: %q\nwant: %q", n+1, i+1, format, got, want)
+			t.Errorf("test %d: line %d: fmt.Sprintf(%q, errs):\n got: %q\nwant: %q", n+1, i+1, format, got, want)
 		}
 	}
 }
@@ -487,7 +487,7 @@ func testFormatCompleteCompare(t *testing.T, n int, arg interface{}, format stri
 	}
 
 	if len(got) != len(want) {
-		t.Fatalf("test %d: fmt.Sprintf(%s, err) -> wrong number of blocks: got(%d) want(%d)\n got: %s\nwant: %s\ngotStr: %q",
+		t.Fatalf("test %d: fmt.Sprintf(%s, errs) -> wrong number of blocks: got(%d) want(%d)\n got: %s\nwant: %s\ngotStr: %q",
 			n+1, format, len(got), len(want), prettyBlocks(got), prettyBlocks(want), gotStr)
 	}
 
@@ -499,13 +499,13 @@ func testFormatCompleteCompare(t *testing.T, n int, arg interface{}, format stri
 				t.Fatal(err)
 			}
 			if !match {
-				t.Fatalf("test %d: block %d: fmt.Sprintf(%q, err):\ngot:\n%q\nwant:\n%q\nall-got:\n%s\nall-want:\n%s\n",
+				t.Fatalf("test %d: block %d: fmt.Sprintf(%q, errs):\ngot:\n%q\nwant:\n%q\nall-got:\n%s\nall-want:\n%s\n",
 					n+1, i+1, format, got[i], want[i], prettyBlocks(got), prettyBlocks(want))
 			}
 		} else {
 			// Match as message
 			if got[i] != want[i] {
-				t.Fatalf("test %d: fmt.Sprintf(%s, err) at block %d got != want:\n got: %q\nwant: %q", n+1, format, i+1, got[i], want[i])
+				t.Fatalf("test %d: fmt.Sprintf(%s, errs) at block %d got != want:\n got: %q\nwant: %q", n+1, format, i+1, got[i], want[i])
 			}
 		}
 	}

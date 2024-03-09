@@ -2,6 +2,7 @@ package orm
 
 import (
 	"database/sql"
+	"github.com/ExerciseCoding/template/internal/orm/internal/errs"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -20,7 +21,7 @@ func TestSelect_Build(t *testing.T) {
 			builder: &Selector[TestModel]{},
 
 			wantQuery: &Query{
-				SQL:  "SELECT * FROM `TestModel`;",
+				SQL:  "SELECT * FROM `test_model`;",
 				Args: nil,
 			},
 		},
@@ -38,7 +39,7 @@ func TestSelect_Build(t *testing.T) {
 			builder: (&Selector[TestModel]{}).From(""),
 
 			wantQuery: &Query{
-				SQL:  "SELECT * FROM `TestModel`;",
+				SQL:  "SELECT * FROM `test_model`;",
 				Args: nil,
 			},
 		},
@@ -56,7 +57,7 @@ func TestSelect_Build(t *testing.T) {
 			builder: (&Selector[TestModel]{}).Where(),
 
 			wantQuery: &Query{
-				SQL:  "SELECT * FROM `TestModel`;",
+				SQL:  "SELECT * FROM `test_model`;",
 				Args: nil,
 			},
 		},
@@ -65,7 +66,7 @@ func TestSelect_Build(t *testing.T) {
 			builder: (&Selector[TestModel]{}).Where(C("Age").Eq(18)),
 
 			wantQuery: &Query{
-				SQL:  "SELECT * FROM `TestModel` WHERE `Age` = ?;",
+				SQL:  "SELECT * FROM `test_model` WHERE `age` = ?;",
 				Args: []any{18},
 			},
 		},
@@ -74,7 +75,7 @@ func TestSelect_Build(t *testing.T) {
 			builder: (&Selector[TestModel]{}).Where(Not(C("Age").Eq(18))),
 
 			wantQuery: &Query{
-				SQL:  "SELECT * FROM `TestModel` WHERE  NOT (`Age` = ?);",
+				SQL:  "SELECT * FROM `test_model` WHERE  NOT (`age` = ?);",
 				Args: []any{18},
 			},
 		},
@@ -83,7 +84,7 @@ func TestSelect_Build(t *testing.T) {
 			builder: (&Selector[TestModel]{}).Where((C("Age").Eq(18)).And(C("FirstName").Eq("Tom"))),
 
 			wantQuery: &Query{
-				SQL:  "SELECT * FROM `TestModel` WHERE (`Age` = ?) AND (`FirstName` = ?);",
+				SQL:  "SELECT * FROM `test_model` WHERE (`age` = ?) AND (`first_name` = ?);",
 				Args: []any{18, "Tom"},
 			},
 		},
@@ -92,9 +93,14 @@ func TestSelect_Build(t *testing.T) {
 			builder: (&Selector[TestModel]{}).Where((C("Age").Eq(18)).Or(C("FirstName").Eq("Tom"))),
 
 			wantQuery: &Query{
-				SQL:  "SELECT * FROM `TestModel` WHERE (`Age` = ?) OR (`FirstName` = ?);",
+				SQL:  "SELECT * FROM `test_model` WHERE (`age` = ?) OR (`first_name` = ?);",
 				Args: []any{18, "Tom"},
 			},
+		},
+		{
+			name:    "invalid column",
+			builder: (&Selector[TestModel]{}).Where((C("Age").Eq(18)).Or(C("abcd").Eq("Tom"))),
+			wantErr: errs.NewErrUnkownField("abcd"),
 		},
 	}
 
@@ -111,8 +117,8 @@ func TestSelect_Build(t *testing.T) {
 }
 
 type TestModel struct {
-	Id        int64
-	FirstName string
-	Age       int8
-	LastName  *sql.NullString
+	Id        	int64
+	FirstName 	string
+	Age       	int8
+	LastName  	*sql.NullString
 }

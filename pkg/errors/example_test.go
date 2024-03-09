@@ -177,7 +177,7 @@ func Example_stackTrace() {
 
 	err, ok := Cause(fn()).(stackTracer)
 	if !ok {
-		panic("oops, err does not implement stackTracer")
+		panic("oops, errs does not implement stackTracer")
 	}
 
 	st := err.StackTrace()
@@ -214,8 +214,8 @@ func ExampleWithCode() {
 	err = WrapC(err, ErrInvalidJSON, "this is a wrap error message with new error code")
 	fmt.Println(codes[err.(*withCode).code].String())
 	fmt.Println(err)
-	//fmt.Printf("%+v\n", err)
-	//fmt.Printf("%#+v\n", err)
+	//fmt.Printf("%+v\n", errs)
+	//fmt.Printf("%#+v\n", errs)
 
 	// Output:
 	// ConfigurationNotValid error

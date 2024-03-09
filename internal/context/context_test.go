@@ -131,7 +131,7 @@ func TestSourceCode(t *testing.T) {
 	//	mu       sync.Mutex            // protects following fields
 	//	done     atomic.Value          // of chan struct{}, created lazily, closed by first cancel call
 	//	children map[canceler]struct{} // set to nil by the first cancel call
-	//	err      error                 // set to non-nil by the first cancel call
+	//	errs      error                 // set to non-nil by the first cancel call
 	//	cause    error                 // set to non-nil by the first cancel call
 	//}
 
@@ -159,9 +159,9 @@ func TestSourceCode(t *testing.T) {
 
 	//if p, ok := parentCancelCtx(parent); ok {
 	//	p.mu.Lock()
-	//	if p.err != nil {  找到最近的是cancelCtx类型的祖先，然后将child加进去祖先的children里面
+	//	if p.errs != nil {  找到最近的是cancelCtx类型的祖先，然后将child加进去祖先的children里面
 	//		// parent has already been canceled
-	//		child.cancel(false, p.err, p.cause)
+	//		child.cancel(false, p.errs, p.cause)
 	//	} else {
 	//		if p.children == nil {
 	//			p.children = make(map[canceler]struct{})

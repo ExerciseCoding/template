@@ -57,3 +57,6 @@ func SetField(entity any, field string, newValue any) error {
 	fieldValue.Set(reflect.ValueOf(newValue))
 	return nil
 }
+
+
+
