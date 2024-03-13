@@ -8,12 +8,14 @@ type Delete[T any] struct{
 	builder
 	where []Predicate
 	table string
+
+	r *registry
 }
 
 func (d *Delete[T]) Build() (*Query, error) {
 	d.sb = &strings.Builder{}
 	var err error
-	d.model, err = parseModel(new(T))
+	d.model, err = d.r.parseModel(new(T))
 	if err != nil {
 		return nil, err
 	}
