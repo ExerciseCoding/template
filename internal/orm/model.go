@@ -12,16 +12,46 @@ const (
 	tagKeyColumn = "column"
 )
 
-type model struct {
-	tableName string
-	fields map[string]*field
+
+
+type Registry interface {
+	Get(val any) (*Model, error)
+	Register(val any, opts...ModelOpt)(*Model, error)
 }
 
-type field struct {
+
+type Model struct {
+	tableName string
+	Fields map[string]*Field
+}
+
+type ModelOpt func(m *Model) error
+
+type Field struct {
 	// 列名
 	colName string
 }
 
+
+func ModelWithTableName(tableName string) ModelOpt {
+	return func(m *Model) error {
+		m.tableName = tableName
+		return nil
+	}
+}
+
+
+func ModelWithColumnName(field string, colName string) ModelOpt {
+	return func(m *Model) error {
+		fd, ok := m.Fields[field]
+		if !ok {
+			return errs.NewErrUnkownField(field)
+
+		}
+		fd.colName = colName
+		return nil
+	}
+}
 
 // var models = map[reflect.Type]*model{}
 //var defaultRegistry = &registry{
@@ -42,19 +72,19 @@ func newRegistry() *registry {
 	return &registry{}
 }
 
-func (r *registry) get(val any) (*model, error) {
+func (r *registry) Get(val any) (*Model, error) {
 	typ := reflect.TypeOf(val)
 	m, ok := r.models.Load(typ)
 	if ok {
-		return m.(*model), nil
+		return m.(*Model), nil
 	}
 	// 缺点：多个go 协程操作这个时会出现覆盖
-	m, err := r.parseModel(val)
+	m, err := r.Register(val)
 	if err != nil {
 		return nil, err
 	}
-	r.models.Store(typ,m)
-	return m.(*model), nil
+
+	return m.(*Model), nil
 }
 
 // 解决registry map并发安全的解法1
@@ -90,7 +120,7 @@ func (r *registry) get(val any) (*model, error) {
 //}
 
 // 只支持一级指针
-func (r *registry) parseModel(entity any) (*model, error) {
+func (r *registry) Register(entity any, opts...ModelOpt) (*Model, error) {
 	typ := reflect.TypeOf(entity)
 	//if typ.Kind() == reflect.Pointer {
 	//	typ = typ.Elem()
@@ -98,11 +128,11 @@ func (r *registry) parseModel(entity any) (*model, error) {
 	if typ.Kind() != reflect.Ptr || typ.Elem().Kind() != reflect.Struct {
 		return nil, errs.ErrPointerOnly
 	}
-	typ = typ.Elem()
-	numField := typ.NumField()
-	fieldMap := make(map[string]*field, numField)
+	elemTyp := typ.Elem()
+	numField := elemTyp.NumField()
+	FieldMap := make(map[string]*Field, numField)
 	for i := 0; i < numField; i++ {
-		fd := typ.Field(i)
+		fd := elemTyp.Field(i)
 		pair, err := r.parseTag(fd.Tag)
 		if err != nil {
 			return nil, err
@@ -112,14 +142,30 @@ func (r *registry) parseModel(entity any) (*model, error) {
 			// 用户没有设置
 			colName = underscoreName(fd.Name)
 		}
-		fieldMap[fd.Name] = &field{
+		FieldMap[fd.Name] = &Field{
 			colName: colName,
 		}
 	}
-	return &model{
-		tableName: underscoreName(typ.Name()),
-		fields: fieldMap,
-	}, nil
+
+	var tableName string
+	if tbl, ok := entity.(TableName); ok {
+		tableName = tbl.TableName()
+	}
+	if tableName == "" {
+		tableName = underscoreName(elemTyp.Name())
+	}
+	res :=  &Model{
+		tableName: tableName,
+		Fields: FieldMap,
+	}
+	for _, opt := range opts {
+		err := opt(res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	r.models.Store(typ, res)
+	return res, nil
 }
 
 type User struct {

@@ -9,7 +9,7 @@ import (
 
 type Selector[T any] struct {
 	table string
-	model *model
+	model *Model
 	where []Predicate
 	sb    *strings.Builder
 	args  []any
@@ -75,7 +75,7 @@ func (s *Selector[T]) BuildOld() (*Query, error) {
 func (s *Selector[T]) Build() (*Query, error) {
 	s.sb = &strings.Builder{}
 	var err error
-	s.model, err = s.db.r.get(new(T))
+	s.model, err = s.db.r.Get(new(T))
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func (s *Selector[T]) buildExpression(expr Expression) error {
 		}
 
 	case Column:
-		fd, ok := s.model.fields[exp.name]
+		fd, ok := s.model.Fields[exp.name]
 		// 字段不对，或者列不对
 		if !ok {
 			return errs.NewErrUnkownField(exp.name)

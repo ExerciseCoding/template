@@ -7,7 +7,7 @@ import (
 
 type builder struct {
 	sb *strings.Builder
-	model *model
+	model *Model
 	args []any
 }
 
@@ -89,7 +89,7 @@ func (d *builder) buildExpression(expr Expression) error {
 		}
 
 	case Column:
-		fd, ok := d.model.fields[exp.name]
+		fd, ok := d.model.Fields[exp.name]
 		// 字段不对，或者列不对
 		if !ok {
 			return errs.NewErrUnkownField(exp.name)
