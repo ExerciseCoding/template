@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -15,7 +16,9 @@ type Delete[T any] struct{
 func (d *Delete[T]) Build() (*Query, error) {
 	d.sb = &strings.Builder{}
 	var err error
+	fmt.Println("11")
 	d.model, err = d.r.Register(new(T))
+	fmt.Println("222")
 	if err != nil {
 		return nil, err
 	}

@@ -22,14 +22,24 @@ type Registry interface {
 
 type Model struct {
 	tableName string
-	Fields map[string]*Field
+	// 字段名-> 字段定义
+	fieldMap map[string]*Field
+
+	// 列名 -> 字段定义
+	columnMap map[string]*Field
 }
 
 type ModelOpt func(m *Model) error
 
 type Field struct {
+	// 字段名
+	goName  string
+
 	// 列名
 	colName string
+
+	// 代表类型
+	typ reflect.Type
 }
 
 
@@ -43,7 +53,7 @@ func ModelWithTableName(tableName string) ModelOpt {
 
 func ModelWithColumnName(field string, colName string) ModelOpt {
 	return func(m *Model) error {
-		fd, ok := m.Fields[field]
+		fd, ok := m.fieldMap[field]
 		if !ok {
 			return errs.NewErrUnkownField(field)
 
@@ -130,7 +140,8 @@ func (r *registry) Register(entity any, opts...ModelOpt) (*Model, error) {
 	}
 	elemTyp := typ.Elem()
 	numField := elemTyp.NumField()
-	FieldMap := make(map[string]*Field, numField)
+	fieldMap := make(map[string]*Field, numField)
+	columnMap := make(map[string]*Field, numField)
 	for i := 0; i < numField; i++ {
 		fd := elemTyp.Field(i)
 		pair, err := r.parseTag(fd.Tag)
@@ -142,9 +153,14 @@ func (r *registry) Register(entity any, opts...ModelOpt) (*Model, error) {
 			// 用户没有设置
 			colName = underscoreName(fd.Name)
 		}
-		FieldMap[fd.Name] = &Field{
+		fdMeta := &Field{
+			goName: fd.Name,
 			colName: colName,
+			// 字段类型
+			typ: fd.Type,
 		}
+		fieldMap[fd.Name] = fdMeta
+		columnMap[colName] = fdMeta
 	}
 
 	var tableName string
@@ -156,7 +172,8 @@ func (r *registry) Register(entity any, opts...ModelOpt) (*Model, error) {
 	}
 	res :=  &Model{
 		tableName: tableName,
-		Fields: FieldMap,
+		fieldMap:  fieldMap,
+		columnMap: columnMap,
 	}
 	for _, opt := range opts {
 		err := opt(res)

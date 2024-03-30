@@ -3,6 +3,7 @@ module github.com/ExerciseCoding/template
 go 1.18
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gogf/gf v1.16.9
 	github.com/google/uuid v1.5.0

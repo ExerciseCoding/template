@@ -2,6 +2,7 @@ package orm
 
 import (
 	"context"
+	_"database/sql"
 	"github.com/ExerciseCoding/template/internal/orm/internal/errs"
 	"reflect"
 	"strings"
@@ -158,7 +159,7 @@ func (s *Selector[T]) buildExpression(expr Expression) error {
 		}
 
 	case Column:
-		fd, ok := s.model.Fields[exp.name]
+		fd, ok := s.model.fieldMap[exp.name]
 		// 字段不对，或者列不对
 		if !ok {
 			return errs.NewErrUnkownField(exp.name)
@@ -190,13 +191,105 @@ func (s *Selector[T]) From(table string) *Selector[T] {
 }
 
 func (s *Selector[T]) Get(ctx context.Context) (*T, error) {
-	//TODO implement me
-	panic("implement me")
+	q, err := s.Build()
+	if err != nil {
+		return nil, err
+	}
+
+	db := s.db.db
+	// 发起查询，并且处理结果集
+	rows, err := db.QueryContext(ctx, q.SQL, q.Args...)
+
+	// 这个是查询错误
+	if err != nil {
+		return nil, err
+	}
+	// 继续处理结果集
+
+	// 确认是否有数据
+	if !rows.Next() {
+		// 是否返回error
+		// 返回error,和sql包语义保持一致
+		return nil, errs.ErrNoRows
+
+	}
+
+	// 在这里处理结果集
+
+	// 怎么知道SELECT 出来了哪些列
+	// 拿到SELECT出来的列
+	cs, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+
+	// 怎么利用cs来解决顺序问题和类型问题
+
+	tp := new(T)
+
+	// 通过cs 来构造vals
+	vals := make([]any, 0, len(cs))
+	valsElem := make([]reflect.Value, 0, len(cs))
+	for _, c := range cs {
+		fd, ok := s.model.columnMap[c]
+		if !ok {
+			return nil, errs.NewErrUnkownColumn(c)
+		}
+		val := reflect.New(fd.typ)
+		vals = append(vals, val.Interface())
+		// 记得调用Elem, 因为fd.Type = int, 那么val是*int
+		valsElem = append(valsElem, val.Elem())
+		//for _, fd :=range s.model.fieldMap {
+		//	if fd.colName == c {
+		//		// 反射创建一个实例
+		//		// 这里创建的实力是原本类型的指针类型
+		//		// 例如：fd.Type = int, 那么val 是 *int指针
+		//		val := reflect.New(fd.typ)
+		//		vals = append(vals, val.Interface())
+		//	}
+		//}
+	}
+
+	err = rows.Scan(vals...)
+	if err != nil {
+		return nil, err
+	}
+
+
+	// 想办法将vals 塞进去 结果tp里面
+	tpValue := reflect.ValueOf(tp).Elem()
+
+	for i, c := range cs {
+		fd, ok := s.model.columnMap[c]
+		if !ok{
+			return nil, errs.NewErrUnkownColumn(c)
+		}
+
+		tpValue.FieldByName(fd.goName).Set(valsElem[i])
+		//for _, fd := range s.model.fieldMap {
+		//	if fd.colName == c {
+		//		tpValue.Elem().FieldByName(fd.goName).Set(reflect.ValueOf(vals[i]).Elem())
+		//	}
+		//}
+	}
+
+	return tp, nil
 }
 
 func (s *Selector[T]) GetMulti(ctx context.Context) ([]*T, error) {
-	//TODO implement me
-	panic("implement me")
+	q, err := s.Build()
+	if err != nil {
+		return nil, err
+	}
+
+	db := s.db.db
+	// 发起查询，并且处理结果集
+	rows, err := db.QueryContext(ctx, q.SQL, q.Args)
+	// 继续处理结果集
+	for rows.Next() {
+		// 构造[]*T
+	}
+	return nil, err
 }
 
 func (s *Selector[T]) Where(ps ...Predicate) *Selector[T] {
