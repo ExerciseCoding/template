@@ -12,53 +12,50 @@ const (
 	tagKeyColumn = "column"
 )
 
-
-
 type Registry interface {
 	Get(val any) (*Model, error)
-	Register(val any, opts...ModelOpt)(*Model, error)
+	Register(val any, opts ...ModelOpt) (*Model, error)
 }
 
-
 type Model struct {
-	tableName string
+	TableName string
 	// 字段名-> 字段定义
-	fieldMap map[string]*Field
+	FieldMap map[string]*Field
 
 	// 列名 -> 字段定义
-	columnMap map[string]*Field
+	ColumnMap map[string]*Field
 }
 
 type ModelOpt func(m *Model) error
 
 type Field struct {
 	// 字段名
-	goName  string
+	GoName string
 
 	// 列名
-	colName string
+	ColName string
 
 	// 代表类型
-	typ reflect.Type
-}
+	Type reflect.Type
 
+	Offset uintptr
+}
 
 func ModelWithTableName(tableName string) ModelOpt {
 	return func(m *Model) error {
-		m.tableName = tableName
+		m.TableName = tableName
 		return nil
 	}
 }
 
-
 func ModelWithColumnName(field string, colName string) ModelOpt {
 	return func(m *Model) error {
-		fd, ok := m.fieldMap[field]
+		fd, ok := m.FieldMap[field]
 		if !ok {
 			return errs.NewErrUnkownField(field)
 
 		}
-		fd.colName = colName
+		fd.ColName = colName
 		return nil
 	}
 }
@@ -68,17 +65,15 @@ func ModelWithColumnName(field string, colName string) ModelOpt {
 //	models: map[reflect.Type]*model{},
 //}
 
-
 // registry 代表的是元数据的注册中心
 type registry struct {
 	// 读写锁
 
 	// models map[reflect.Type]*model
 	models sync.Map
-
 }
 
-func newRegistry() *registry {
+func NewRegistry() *registry {
 	return &registry{}
 }
 
@@ -130,7 +125,7 @@ func (r *registry) Get(val any) (*Model, error) {
 //}
 
 // 只支持一级指针
-func (r *registry) Register(entity any, opts...ModelOpt) (*Model, error) {
+func (r *registry) Register(entity any, opts ...ModelOpt) (*Model, error) {
 	typ := reflect.TypeOf(entity)
 	//if typ.Kind() == reflect.Pointer {
 	//	typ = typ.Elem()
@@ -154,10 +149,11 @@ func (r *registry) Register(entity any, opts...ModelOpt) (*Model, error) {
 			colName = underscoreName(fd.Name)
 		}
 		fdMeta := &Field{
-			goName: fd.Name,
-			colName: colName,
+			GoName:  fd.Name,
+			ColName: colName,
 			// 字段类型
-			typ: fd.Type,
+			Type:   fd.Type,
+			Offset: fd.Offset,
 		}
 		fieldMap[fd.Name] = fdMeta
 		columnMap[colName] = fdMeta
@@ -170,10 +166,10 @@ func (r *registry) Register(entity any, opts...ModelOpt) (*Model, error) {
 	if tableName == "" {
 		tableName = underscoreName(elemTyp.Name())
 	}
-	res :=  &Model{
-		tableName: tableName,
-		fieldMap:  fieldMap,
-		columnMap: columnMap,
+	res := &Model{
+		TableName: tableName,
+		FieldMap:  fieldMap,
+		ColumnMap: columnMap,
 	}
 	for _, opt := range opts {
 		err := opt(res)
@@ -211,18 +207,18 @@ func (r *registry) parseTag(tag reflect.StructTag) (map[string]string, error) {
 
 // underscoreName 驼峰转字符串命名
 func underscoreName(tableName string) string {
-	 var buf []byte
-	 for i, v := range tableName {
-		 if unicode.IsUpper(v) {
-			 if i != 0 {
-				 buf = append(buf, '_')
-			 }
-			 buf = append(buf, byte(unicode.ToLower(v)))
+	var buf []byte
+	for i, v := range tableName {
+		if unicode.IsUpper(v) {
+			if i != 0 {
+				buf = append(buf, '_')
+			}
+			buf = append(buf, byte(unicode.ToLower(v)))
 
-		 } else {
-			 buf = append(buf, byte(v))
-		 }
-	 }
+		} else {
+			buf = append(buf, byte(v))
+		}
+	}
 
-	 return string(buf)
+	return string(buf)
 }
