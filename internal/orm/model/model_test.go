@@ -1,4 +1,4 @@
-package orm
+package model
 
 import (
 	"database/sql"
@@ -17,7 +17,7 @@ func Test_registry_Register(t *testing.T) {
 		wantModel *Model
 		fields    []*Field
 		wantErr   error
-		opts      []ModelOpt
+		opts      []Option
 	}{
 		{
 			name:   "test model",
@@ -35,16 +35,19 @@ func Test_registry_Register(t *testing.T) {
 					ColName: "first_name",
 					GoName:  "FirstName",
 					Type:    reflect.TypeOf(""),
+					Offset:  8,
 				},
 				{
 					ColName: "last_name",
 					GoName:  "LastName",
 					Type:    reflect.TypeOf(&sql.NullString{}),
+					Offset:  32,
 				},
 				{
 					ColName: "age",
 					GoName:  "Age",
 					Type:    reflect.TypeOf(int8(0)),
+					Offset:  24,
 				},
 			},
 			wantErr: errs.ErrPointerOnly,
@@ -88,7 +91,7 @@ func Test_registry_Register(t *testing.T) {
 		},
 	}
 
-	r := registry{}
+	r := Registry{}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			m, err := r.Register(tc.entity, tc.opts...)
@@ -149,16 +152,19 @@ func TestRegistry_get(t *testing.T) {
 					ColName: "first_name",
 					GoName:  "FirstName",
 					Type:    reflect.TypeOf(""),
+					Offset:  8,
 				},
 				{
 					ColName: "last_name",
 					GoName:  "LastName",
 					Type:    reflect.TypeOf(&sql.NullString{}),
+					Offset:  32,
 				},
 				{
 					ColName: "age",
 					GoName:  "Age",
 					Type:    reflect.TypeOf(int8(0)),
+					Offset:  24,
 				},
 			},
 		},
@@ -326,7 +332,7 @@ func TestRegistry_get(t *testing.T) {
 			assert.Equal(t, tc.wantModel, m)
 
 			typ := reflect.TypeOf(tc.entity)
-			cach, ok := r.models.Load(typ)
+			cach, ok := r.(*Registry).models.Load(typ)
 			assert.True(t, ok)
 			assert.Equal(t, tc.wantModel, cach)
 
@@ -360,7 +366,7 @@ func (e *EmplyTableName) TableName() string {
 
 func TestModelWithTableName(t *testing.T) {
 	r := NewRegistry()
-	m, err := r.Register(&TestModel{}, ModelWithTableName("test_model_ttt"))
+	m, err := r.Register(&TestModel{}, WithTableName("test_model_ttt"))
 	require.NoError(t, err)
 	assert.Equal(t, "test_model_ttt", m.TableName)
 }
@@ -392,7 +398,7 @@ func TestModelWithColumnName(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			r := NewRegistry()
-			m, err := r.Register(&TestModel{}, ModelWithColumnName(tc.field, tc.colName))
+			m, err := r.Register(&TestModel{}, WithColumnName(tc.field, tc.colName))
 			assert.Equal(t, tc.wantErr, err)
 			if err != nil {
 				return
@@ -402,4 +408,11 @@ func TestModelWithColumnName(t *testing.T) {
 			assert.Equal(t, tc.wantColName, fd.ColName)
 		})
 	}
+}
+
+type TestModel struct {
+	Id        int64
+	FirstName string
+	Age       int8
+	LastName  *sql.NullString
 }

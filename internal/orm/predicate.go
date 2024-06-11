@@ -40,15 +40,7 @@ type Predicate struct {
 //	}
 //}
 
-type Column struct {
-	name string
-}
 
-func C(name string) Column {
-	return Column{
-		name: name,
-	}
-}
 
 // C("id").Eq(12)
 // sub.C("id").Eq(12)
@@ -60,29 +52,6 @@ func C(name string) Column {
 //	}
 //}
 
-func (c Column) Eq(arg any) Predicate {
-	return Predicate{
-		left: c,
-		op:   opEq,
-		right: Value{
-			val: arg,
-		},
-	}
-}
-
-func (c Column) Lt(arg any) Predicate {
-	return Predicate{
-		left: c,
-		op:   opLt,
-		right: Value{
-			val: arg,
-		},
-	}
-}
-
-func (c Column) expr() {
-
-}
 
 // Not(C("name").Eq("Tom"))
 func Not(p Predicate) Predicate {

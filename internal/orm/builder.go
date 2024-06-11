@@ -2,13 +2,14 @@ package orm
 
 import (
 	"github.com/ExerciseCoding/template/internal/orm/internal/errs"
+	model2 "github.com/ExerciseCoding/template/internal/orm/model"
 	"strings"
 )
 
 type builder struct {
-	sb *strings.Builder
-	model *Model
-	args []any
+	sb    *strings.Builder
+	model *model2.Model
+	args  []any
 }
 
 // 方法一：buildPredicates抽离方式
@@ -16,7 +17,6 @@ type builder struct {
 //func (p Predicates) buildPredicates(s *strings.Builder) error {
 //
 //}
-
 
 // 方法二：buildPredicates抽离方式
 //type Predicates struct {
@@ -29,7 +29,6 @@ type builder struct {
 //	// 拼接WHERE或者HAVING的部分
 //}
 
-
 func (d *builder) buildPredicates(ps []Predicate) error {
 	p := ps[0]
 	for i := 1; i < len(ps); i++ {
@@ -37,7 +36,6 @@ func (d *builder) buildPredicates(ps []Predicate) error {
 	}
 	return d.buildExpression(p)
 }
-
 
 func (d *builder) buildExpression(expr Expression) error {
 	switch exp := expr.(type) {
@@ -89,13 +87,13 @@ func (d *builder) buildExpression(expr Expression) error {
 		}
 
 	case Column:
-		fd, ok := d.model.fieldMap[exp.name]
+		fd, ok := d.model.FieldMap[exp.name]
 		// 字段不对，或者列不对
 		if !ok {
 			return errs.NewErrUnkownField(exp.name)
 		}
 		d.sb.WriteByte('`')
-		d.sb.WriteString(fd.colName)
+		d.sb.WriteString(fd.ColName)
 		d.sb.WriteByte('`')
 
 	case Value:

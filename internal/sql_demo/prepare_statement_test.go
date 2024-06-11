@@ -11,7 +11,15 @@ import (
 func TestPrepare(t *testing.T) {
 	db, err := sql.Open("sqlite3", "file:test.db?cache=shared&mode=memory")
 	require.NoError(t, err)
-	ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
+	_, err = db.ExecContext(context.Background(), `
+	CREATE TABLE IF NOT EXISTS test_model(
+		id INTEGER PRIMARY KEY,
+		first_name TEXT NOT NULL,
+		age INTEGER,
+		last_name TEXT NOT NULL
+	)
+	`)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	stmt, err := db.PrepareContext(ctx, "SELECT * FROM `test_model` where `id`=?")
 	require.NoError(t, err)
@@ -27,8 +35,6 @@ func TestPrepare(t *testing.T) {
 	// 整个应用关闭的时候调用
 	stmt.Close()
 
-
-
 	// prepare的缺点
 	//stmt, err := db.PrepareContext(ctx, "SELECT * FROM `test_model` where `id` IN (?, ?, ?)")
 	//stmt, err := db.PrepareContext(ctx, "SELECT * FROM `test_model` where `id` IN (?, ?, ?,?)")
@@ -36,9 +42,9 @@ func TestPrepare(t *testing.T) {
 }
 
 type TestModel struct {
-	Id   int64 `eorm:"auto_increament,primary_key"`
+	Id        int64 `eorm:"auto_increament,primary_key"`
 	FirstName string
-	Age  int8
+	Age       int8
 	// sql.NullString 主要用于处理那些数据库表中允许为空的字符串列，例如在 SQL 数据库中定义为 VARCHAR NULL 的列。通常，当您从数据库中查询这样的列时，结果会以 sql.NullString 的形式返回。
-	LastName   *sql.NullString
+	LastName *sql.NullString
 }

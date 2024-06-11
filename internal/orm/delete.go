@@ -2,22 +2,22 @@ package orm
 
 import (
 	"fmt"
+	"github.com/ExerciseCoding/template/internal/orm/model"
 	"strings"
 )
 
-type Delete[T any] struct{
+type Delete[T any] struct {
 	builder
 	where []Predicate
 	table string
-
-	r *registry
 }
 
 func (d *Delete[T]) Build() (*Query, error) {
 	d.sb = &strings.Builder{}
 	var err error
 	fmt.Println("11")
-	d.model, err = d.r.Register(new(T))
+	r := model.NewRegistry()
+	d.model, err = r.Register(new(T))
 	fmt.Println("222")
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (d *Delete[T]) Build() (*Query, error) {
 	sb.WriteString("DELETE FROM ")
 	if d.table == "" {
 		sb.WriteByte('`')
-		sb.WriteString(d.model.tableName)
+		sb.WriteString(d.model.TableName)
 		sb.WriteByte('`')
 	} else {
 		sb.WriteString(d.table)
@@ -48,13 +48,10 @@ func (d *Delete[T]) Build() (*Query, error) {
 	}
 	sb.WriteByte(';')
 	return &Query{
-		SQL: sb.String(),
+		SQL:  sb.String(),
 		Args: d.args,
 	}, nil
 }
-
-
-
 
 //func (d *Delete[T]) buildExpression(expr Expression) error {
 //	switch exp := expr.(type) {
@@ -125,8 +122,7 @@ func (d *Delete[T]) Build() (*Query, error) {
 //	return nil
 //}
 
-
-func (d *Delete[T]) From(table string) (*Delete[T]) {
+func (d *Delete[T]) From(table string) *Delete[T] {
 	d.table = table
 	return d
 }
@@ -135,7 +131,6 @@ func (d *Delete[T]) Where(ps ...Predicate) *Delete[T] {
 	d.where = ps
 	return d
 }
-
 
 //func (d *Delete[T]) addArgs(val any) {
 //	if d.args == nil {

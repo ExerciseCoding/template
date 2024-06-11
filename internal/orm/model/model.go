@@ -1,4 +1,4 @@
-package orm
+package model
 
 import (
 	"github.com/ExerciseCoding/template/internal/orm/internal/errs"
@@ -14,7 +14,7 @@ const (
 
 type Registry interface {
 	Get(val any) (*Model, error)
-	Register(val any, opts ...ModelOpt) (*Model, error)
+	Register(val any, opts ...Option) (*Model, error)
 }
 
 type Model struct {
@@ -26,7 +26,7 @@ type Model struct {
 	ColumnMap map[string]*Field
 }
 
-type ModelOpt func(m *Model) error
+type Option func(m *Model) error
 
 type Field struct {
 	// 字段名
@@ -41,14 +41,14 @@ type Field struct {
 	Offset uintptr
 }
 
-func ModelWithTableName(tableName string) ModelOpt {
+func WithTableName(tableName string) Option {
 	return func(m *Model) error {
 		m.TableName = tableName
 		return nil
 	}
 }
 
-func ModelWithColumnName(field string, colName string) ModelOpt {
+func WithColumnName(field string, colName string) Option {
 	return func(m *Model) error {
 		fd, ok := m.FieldMap[field]
 		if !ok {
@@ -73,7 +73,7 @@ type registry struct {
 	models sync.Map
 }
 
-func NewRegistry() *registry {
+func NewRegistry() Registry {
 	return &registry{}
 }
 
@@ -125,7 +125,7 @@ func (r *registry) Get(val any) (*Model, error) {
 //}
 
 // 只支持一级指针
-func (r *registry) Register(entity any, opts ...ModelOpt) (*Model, error) {
+func (r *registry) Register(entity any, opts ...Option) (*Model, error) {
 	typ := reflect.TypeOf(entity)
 	//if typ.Kind() == reflect.Pointer {
 	//	typ = typ.Elem()
@@ -221,4 +221,8 @@ func underscoreName(tableName string) string {
 	}
 
 	return string(buf)
+}
+
+type TableName interface {
+	TableName() string
 }
